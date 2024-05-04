@@ -27,14 +27,21 @@ func InitializeDBus(conn *dbus.Conn) {
 		logging.Critical.Panic(err)
 	}
 
+	propsSpec := map[string]map[string]*prop.Prop{}
+	props, err := prop.Export(conn, objectPath, propsSpec)
+	if err != nil {
+		logging.Critical.Panic(err)
+	}
+
 	node := &introspect.Node{
 		Name: objectPath,
 		Interfaces: []introspect.Interface{
 			introspect.IntrospectData,
 			prop.IntrospectData,
 			{
-				Name:    ifaceName,
-				Methods: introspect.Methods(d),
+				Name:       ifaceName,
+				Methods:    introspect.Methods(d),
+				Properties: props.Introspection(ifaceName),
 			},
 		},
 	}
